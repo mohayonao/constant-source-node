@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>StereoPannerNode</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <link rel="stylesheet" href=https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css>
+  <style>
+    #code { padding: 0; margin: 0; background: white; border: none }
+    #app { margin: 10px 0 }
+    #app .btn { width: 100px }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1>constant-source-node</h1>
+      <div>
+        <a href="https://travis-ci.org/mohayonao/constant-source-node"><img src="https://img.shields.io/travis/mohayonao/constant-source-node.svg?style=flat-square"/></a>
+        <a href="https://www.npmjs.org/package/constant-source-node"><img src="https://img.shields.io/npm/v/constant-source-node.svg?style=flat-square"/></a>
+        <a href="https://mohayonao.mit-license.org/"><img src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square"/></a>
+      </div>
+    </div>
+    <div>StereoPannerNode for legacy Web Audio API | <a href="https://github.com/mohayonao/constant-source-node" target="github">GitHub</a></div>
+    <div id="app">
+      <button id="button" class="btn btn-default">Start</button>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">example</h3>
+        </div>
+        <div class="panel-body">
+          <pre class="prettyprint" id="code"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+  <script src="https://mohayonao.github.io/web-audio-scheduler/build/web-audio-scheduler.min.js"></script>
+  <script src="./build/constant-source-node.js"></script>
+  <script>
+  ConstantSourceNode.polyfill();
+
+  window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+  window.addEventListener("DOMContentLoaded", function() {
+    "use strict";
+
+    var isPlaying = false;
+
+    function startWebAudioAPI() {
+      if (startWebAudioAPI.done) {
+        return;
+      }
+      var bufSrc = audioContext.createBufferSource();
+
+      bufSrc.buffer = audioContext.createBuffer(1, 128, audioContext.sampleRate);
+      bufSrc.start(audioContext.currentTime);
+      bufSrc.stop(audioContext.currentTime + bufSrc.buffer.duration);
+      bufSrc.onended = function() {
+        bufSrc.disconnect();
+      };
+      bufSrc.connect(audioContext.destination);
+
+      startWebAudioAPI.done = true;
+    }
+
+    document.getElementById("button").addEventListener("click", function(e) {
+      isPlaying = !isPlaying;
+
+      startWebAudioAPI();
+
+      if (isPlaying) {
+        sched.start(compose, { counter: 0 });
+        e.target.textContent = "Stop";
+      } else {
+        sched.stop(true);
+        e.target.textContent = "Start";
+      }
+    });
+
+    // code
+    document.getElementById("code").textContent = document.getElementById("example").textContent;
+
+    prettyPrint();
+  });
+  </script>
+  <script id="example">
+    var audioContext = new AudioContext();
+    var sched = new WebAudioScheduler({ context: audioContext });
+    var chords = [
+      [ 62, 65, 69, 72 ], [ 62, 65, 69, 71 ], [ 60, 64, 67, 71 ], [ 60, 64, 67, 69 ],
+      [ 62, 65, 69, 72 ], [ 62, 65, 69, 71 ], [ 60, 64, 67, 71 ], [ 60, 64, 67, 72 ],
+      [ 62, 65, 69, 72 ], [ 62, 65, 69, 71 ], [ 60, 64, 67, 71 ], [ 60, 64, 67, 69 ],
+      [ 59, 62, 66, 69 ], [ 59, 62, 66, 68 ], [ 57, 62, 64, 69 ], [ 57, 61, 64, 69 ],
+    ];
+
+    function sine(e) {
+      var t0 = e.playbackTime;
+      var dur = e.args.dur;
+      var chord = e.args.chord;
+      var t1 = t0 + dur * 0.2;
+      var t2 = t1 + dur * 0.3;
+      var t3 = t2 + dur * 0.5;
+      var volume = 0.8 / chord.length;
+      var gain = audioContext.createGain();
+      var constSource = audioContext.createConstantSource();
+
+      chord.forEach(function(midi) {
+        var oscillator = audioContext.createOscillator();
+
+        oscillator.frequency.value = mtof(midi);
+        oscillator.start(t0);
+        oscillator.stop(t3);
+        oscillator.connect(gain);
+      });
+
+      constSource.offset.setValueAtTime(0, t0);
+      for (var tx = t0; tx < t3; tx += 0.1) {
+        constSource.offset.linearRampToValueAtTime(rand2(0.2), tx + 0.1);
+      }
+
+      constSource.start(t0);
+      constSource.stop(t3);
+      constSource.connect(gain.gain);
+
+      gain.gain.setValueAtTime(0, t0);
+      gain.gain.linearRampToValueAtTime(volume, t1);
+      gain.gain.setValueAtTime(volume, t2);
+      gain.gain.linearRampToValueAtTime(0, t3);
+      gain.connect(audioContext.destination);
+    }
+
+    function compose(e) {
+      var t0 = e.playbackTime;
+      var counter = e.args.counter;
+
+      var chord = chords[counter % chords.length];
+      var t1 = t0 + 4;
+      var dur = t1 - t0;
+      var opts = { chord: chord, dur: dur };
+
+      sched.insert(t0, sine, opts);
+
+      sched.insert(t1, compose, { counter: counter + 1 });
+    }
+
+    function rand2(value) {
+      return (Math.random() * 2 - 1) * value;
+    }
+
+    function mtof(midi) {
+      return 440 * Math.pow(2, (midi - 69) / 12);
+    }
+  </script>
+</body>
+</html>

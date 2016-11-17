@@ -39,6 +39,10 @@ var constantSource = audioContext.createConstantSource();
 constantSource.offset.value = 10;
 ```
 
+#### Demo
+
+https://mohayonao.github.io/constant-source-node/
+
 ## API
 ### ConstantSourceNode
   - `constructor(audioContext: AudioContext, opts={})`
