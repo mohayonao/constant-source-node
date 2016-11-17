@@ -1,0 +1,50 @@
+{
+  "name": "constant-source-node",
+  "description": "ConstantSourceNode for legacy Web Audio API",
+  "version": "0.0.0",
+  "author": "Nao Yonamine <mohayonao@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/mohayonao/constant-source-node/issues"
+  },
+  "dependencies": {
+    "base-audio-context": "^1.1.0"
+  },
+  "devDependencies": {
+    "browserify": "^13.1.1",
+    "eslint": "^3.9.1",
+    "mocha": "^3.1.2",
+    "npm-run-all": "^3.1.1",
+    "run-with-mocha": "^1.1.0",
+    "uglifyify": "^3.0.4",
+    "web-audio-test-api": "^0.5.2"
+  },
+  "files": [
+    "package.json",
+    "README.md",
+    "index.js"
+  ],
+  "homepage": "http://mohayonao.github.io/constant-source-node/",
+  "keywords": [
+    "polyfill",
+    "constantsourcenode",
+    "webaudio"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mohayonao/constant-source-node.git"
+  },
+  "scripts": {
+    "build": "npm-run-all build:*",
+    "build:browser": "browserify --standalone ConstantSourceNode -o build/constant-source-node.js index.js",
+    "build:minify": "browserify --standalone ConstantSourceNode -o build/constant-source-node.min.js -t uglifyify index.js ",
+    "lint": "eslint index.js test",
+    "postversion": "git push && git push --tags",
+    "prepublish": "npm-run-all test build",
+    "preversion": "npm run test",
+    "test": "mocha",
+    "travis": "npm run test",
+    "version": "npm run build && git add -A build"
+  }
+}
