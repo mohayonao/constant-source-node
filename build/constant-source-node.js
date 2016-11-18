@@ -18,6 +18,7 @@ function ConstantSourceNode(audioContext, opts) {
   var buffer = audioContext.createBuffer(1, ConstantValues.length, audioContext.sampleRate);
   var gain = audioContext.createGain();
   var offset = typeof opts.offset === "number" ? opts.offset : 1;
+  var startFunc = bufferSource.start;
 
   gain.channelCount = 1;
   gain.channelCountMode = "explicit";
@@ -34,6 +35,12 @@ function ConstantSourceNode(audioContext, opts) {
     offset: {
       value: gain.gain,
       enumerable: true, writable: false, configurable: true
+    },
+    start: {
+      value: function(when) {
+        startFunc.call(bufferSource, when);
+      },
+      enumerable: false, writable: false, configurable: true
     },
     connect: {
       value: AudioNode.prototype.connect.bind(gain),
