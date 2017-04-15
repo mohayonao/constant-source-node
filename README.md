@@ -1,7 +1,7 @@
 # ConstantSourceNode
-[![Build Status](http://img.shields.io/travis/mohayonao/constant-source-node.svg?style=flat-square)](https://travis-ci.org/mohayonao/constant-source-node)
-[![NPM Version](http://img.shields.io/npm/v/constant-source-node.svg?style=flat-square)](https://www.npmjs.org/package/constant-source-node)
-[![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](http://mohayonao.mit-license.org/)
+[![Build Status](https://img.shields.io/travis/mohayonao/constant-source-node.svg?style=flat-square)](https://travis-ci.org/mohayonao/constant-source-node)
+[![NPM Version](https://img.shields.io/npm/v/constant-source-node.svg?style=flat-square)](https://www.npmjs.org/package/constant-source-node)
+[![License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://mohayonao.mit-license.org/)
 
 > ConstantSourceNode for legacy Web Audio API
 
