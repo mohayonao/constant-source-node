@@ -23,7 +23,7 @@
     "README.md",
     "index.js"
   ],
-  "homepage": "http://mohayonao.github.io/constant-source-node/",
+  "homepage": "https://mohayonao.github.io/constant-source-node/",
   "keywords": [
     "polyfill",
     "constantsourcenode",
